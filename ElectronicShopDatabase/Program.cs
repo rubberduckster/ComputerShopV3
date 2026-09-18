@@ -7,8 +7,10 @@ namespace ElectronicShopDatabase
     {
         static void Main(string[] args)
         {
+            // Create the database context
             ShopContext context = new ShopContext();
 
+            // Create the initial products
             List<Product> products = new List<Product>
             {
                 new Product("Gaming Laptop", "Computer", 12500m),
@@ -25,7 +27,7 @@ namespace ElectronicShopDatabase
                 new Product("32\" 4K Skærm", "Skærm", 5500m)
             };
 
-            // Only runs if there's no products in the database
+            // Only runs if there's no products in the database // We don't want duplicates
             if (!context.Products.Any())
             {
                 context.Products.AddRange(products);
@@ -131,6 +133,7 @@ namespace ElectronicShopDatabase
                 Console.WriteLine($"{product.Id}: {product.Name} - {product.Category} - {product.Price} kr.");
             }
 
+            // Add UnitsSold values to the products
             List<Product> productsToUpdate = context.Products.ToList();
 
             foreach (Product product in productsToUpdate)
@@ -174,6 +177,7 @@ namespace ElectronicShopDatabase
 
             context.SaveChanges();
 
+            // Group products by category and calculate total units sold
             var salesByCategory = context.Products.GroupBy(product => product.Category).Select(group => new { Category = group.Key, TotalUnitsSold = group.Sum(product => product.UnitsSold) }).ToList();
 
             Console.WriteLine("\n=== Units Sold By Category ===");
@@ -183,6 +187,7 @@ namespace ElectronicShopDatabase
                 Console.WriteLine($"{category.Category}: {category.TotalUnitsSold} units sold");
             }
 
+            // Display units sold as a bar chart // 1 per 5th product
             Console.WriteLine("\n=== Sales Chart ===");
 
             foreach (var category in salesByCategory)
@@ -199,8 +204,9 @@ namespace ElectronicShopDatabase
                 Console.WriteLine($" {category.TotalUnitsSold}");
             }
 
-            // Laptops
+            // Add schema-flexible specifications to laptops and screens
 
+            // Laptops
             Product? gamingLaptop = context.Products.FirstOrDefault(product => product.Name == "Gaming Laptop");
 
             if (gamingLaptop != null)
@@ -242,7 +248,6 @@ namespace ElectronicShopDatabase
 
 
             // Screens
-
             Product? screen4K = context.Products.FirstOrDefault(product => product.Name == "4K Skærm");
 
             if (screen4K != null)
@@ -284,6 +289,7 @@ namespace ElectronicShopDatabase
 
             context.SaveChanges();
 
+            // Find products where the brand specification is Lenovo
             var lenovoProducts = context.Products.AsEnumerable().Where(product => product.Specifications != null && product.Specifications.ContainsKey("brand") && product.Specifications["brand"] == "Lenovo").ToList();
 
             Console.WriteLine("\n=== Lenovo Products ===");
